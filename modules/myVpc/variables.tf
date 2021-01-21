@@ -16,8 +16,11 @@ variable "vpcCIDRblock" {
 variable "publicSubnetCIDRblock" {
     default = "10.0.0.0/24"
 }
-variable "privateSubnetCIDRblock" {
+variable "privateSubnet1CIDRblock" {
     default = "10.0.1.0/24"
+}
+variable "privateSubnet2CIDRblock" {
+    default = "10.0.2.0/24"
 }
 variable "destinationCIDRblock" {
     default = "0.0.0.0/0"
@@ -32,4 +35,13 @@ variable "egressCIDRblock" {
 }
 variable "mapPublicIP" {
     default = true
+}
+variable "ingress_ports" {
+  type        = list(number)
+  description = "list of ingress ports"
+  default     = [22, 80]
+}
+variable stack {
+  description = "this is name for tags"
+  default     = "terraform"
 }

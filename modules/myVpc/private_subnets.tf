@@ -1,4 +1,7 @@
 # create the Private Subnet
+data "aws_availability_zones" "azs" {
+
+}
 resource "aws_subnet" "My_VPC_Private_Subnet" {
   depends_on = [
     aws_vpc.My_VPC,
@@ -6,13 +9,39 @@ resource "aws_subnet" "My_VPC_Private_Subnet" {
   ]
   vpc_id = aws_vpc.My_VPC.id
   #count                   = 
-  cidr_block              = var.privateSubnetCIDRblock
-  availability_zone       = var.availabilityZone
+  cidr_block              = var.privateSubnet1CIDRblock
+  availability_zone       = data.aws_availability_zones.azs.names[0]
   map_public_ip_on_launch = false
   tags = {
     Name = "My VPC Private Subnet"
   }
 }
+
+resource "aws_subnet" "My_VPC_Private_Subnet2" {
+  depends_on = [
+    aws_vpc.My_VPC,
+    aws_subnet.My_VPC_Public_Subnet
+  ]
+  vpc_id = aws_vpc.My_VPC.id
+  #count                   = 
+  cidr_block              = var.privateSubnet2CIDRblock
+  availability_zone       = data.aws_availability_zones.azs.names[1]
+  map_public_ip_on_launch = false
+  tags = {
+    Name = "My VPC Private Subnet"
+  }
+}
+
+
+# Subnet Group
+resource "aws_db_subnet_group" "mysql" {
+  name       = "${var.stack}-subngroup"
+  subnet_ids = [aws_subnet.My_VPC_Private_Subnet.id,aws_subnet.My_VPC_Private_Subnet2.id]
+  tags = {
+    Name = "${var.stack}-subnetGroup"
+  }
+}
+
 
 /* EIP */
 resource "aws_eip" "nat_eip" {
@@ -54,6 +83,15 @@ resource "aws_route_table_association" "Nat-Gateway-RT-Association" {
   ]
   #  Private Subnet ID for adding this route table to the DHCP server of Private subnet!
   subnet_id = aws_subnet.My_VPC_Private_Subnet.id
+  # Route Table ID
+  route_table_id = aws_route_table.nat_gateway_rt.id
+}
+resource "aws_route_table_association" "Nat-Gateway-RT-Association1" {
+  depends_on = [
+    aws_route_table.nat_gateway_rt
+  ]
+  #  Private Subnet ID for adding this route table to the DHCP server of Private subnet!
+  subnet_id = aws_subnet.My_VPC_Private_Subnet2.id
   # Route Table ID
   route_table_id = aws_route_table.nat_gateway_rt.id
 }
