@@ -8,16 +8,17 @@
     #System Settings
     php_modules: [ 'php-curl', 'php-gd', 'php-mbstring', 'php-xml', 'php-xmlrpc', 'php-soap', 'php-intl', 'php-zip' ]
     #MySQL Settings
-    mysql_root_password: "mysql_root_password"
-    mysql_db: "mydb"
-    mysql_user: "qwerty"
-    mysql_password: "mypassword"
+    mysql_root_user: "${root_user}"
+    mysql_root_password: "${root_pass}"
+    mysql_db: "${db_name}"
+    mysql_db_user: "${db_user}"
+    mysql_db_password: "${db_pass}"
     #HTTP Settings
     http_host: "wordpress"
     http_conf: "wordpress.conf"
     http_port: "80"
-    host: '${db_host}'
-    port: '${db_port}'
+    db_host: '${db_host}'
+    db_port: '${db_port}'
 
   tasks:
     - name: Install prerequisites
@@ -46,7 +47,7 @@
 
     - name: Set up Apache VirtualHost
       template:
-        src: "tmp/apache.conf.j2"
+        src: "/tmp/apache.conf.j2"
         dest: "/etc/apache2/sites-available/{{ http_conf }}"
       notify: Reload Apache
       tags: [ apache ]
@@ -66,53 +67,26 @@
       notify: Restart Apache
       tags: [ apache ]
 
-  # MySQL Configuration
-    - name: Set the root password
-      mysql_user:
-        name: root
-        host: "{{ db_host }}"
-        port: "{{ db_port }}"
-        password: "{{ mysql_root_password }}"
-        #login_unix_socket: /var/run/mysqld/mysqld.sock
-      tags: [ mysql, mysql-root ]
-
-    # - name: Remove all anonymous user accounts
-    #   mysql_user:
-    #     name: ''
-    #     host_all: yes
-    #     state: absent
-    #     login_user: root
-    #     login_password: "{{ mysql_root_password }}"
-    #   tags: [ mysql ]
-
-    # - name: Remove the MySQL test database
-    #   mysql_db:
-    #     name: test
-    #     state: absent
-    #     login_user: root
-    #     login_password: "{{ mysql_root_password }}"
-    #   tags: [ mysql ]
-
     - name: Creates database for WordPress
       mysql_db:
         name: "{{ mysql_db }}"
         state: present
-        host: "{{ db_host }}"
-        port: "{{ db_port }}"
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
+        login_host: "{{ db_host }}"
+        #login_port: "{{ db_port }}"
+        login_user: "{{ mysql_root_user }}"
+        login_password: "{{ mysql_root_pass }}"
       tags: [ mysql ]
 
     - name: Create MySQL user for WordPress
       mysql_user:
-        host: "{{ db_host }}"
-        port: "{{ db_port }}"
-        name: "{{ mysql_user }}"
-        password: "{{ mysql_password }}"
-        priv: "{{ mysql_db }}.*:ALL"
-        state: present
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
+         login_host: "{{ db_host }}"
+         #port: "{{ db_port }}"
+         name: "{{ mysql_db_user }}"
+         password: "{{ mysql_db_pass }}"
+         priv: "{{ mysql_db }}.*:ALL"
+         state: present
+         login_user: "{{ mysql_root_user }}"
+         login_password: "{{ mysql_root_pass }}"
       tags: [ mysql ]
 
   # UFW Configuration
@@ -151,7 +125,7 @@
 
     - name: Set up wp-config
       template:
-        src: "tmp/wp-config.php.j2"
+        src: "/tmp/wp-config.php"
         dest: "/var/www/{{ http_host }}/wordpress/wp-config.php"
       tags: [ wordpress ]
 
@@ -165,3 +139,4 @@
       service:
         name: apache2
         state: restarted
+

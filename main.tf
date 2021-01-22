@@ -12,7 +12,7 @@ resource "aws_key_pair" "my_ec2_keypair" {
   public_key = file(var.ssh_pub_key)
 }
 data "template_file" "user_data" {
-  template = file("./files/userdata.sh")
+  template = file("./files/userdata.tpl")
 }
 
 resource "aws_instance" "example" {
@@ -47,6 +47,30 @@ resource "aws_instance" "example" {
       private_key = file(var.ssh_priv_key)
     }
   }
+  provisioner "file" {
+    content     = data.template_file.apache.rendered
+    destination = "/tmp/apache.conf.j2"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      host        = self.public_ip
+      private_key = file(var.ssh_priv_key)
+    }
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo /bin/bash /var/lib/cloud/instance/scripts/part-001 >> installer.log",
+      "ansible-playbook /tmp/main.yml >> /tmp/play.log"
+      ]
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      host        = self.public_ip
+      private_key = file(var.ssh_priv_key)
+    }
+  }
 }
 
 data "template_file" "phpconfig" {
@@ -55,9 +79,9 @@ data "template_file" "phpconfig" {
   vars = {
     db_port = aws_db_instance.mysql.port
     db_host = aws_db_instance.mysql.address
-    db_user = var.username
-    db_pass = var.password
-    db_name = var.dbname
+    db_user = var.db_user
+    db_pass = var.db_pass
+    db_name = var.db_name
   }
 }
 
@@ -68,7 +92,17 @@ data "template_file" "playbook" {
   vars = {
     db_port = aws_db_instance.mysql.port
     db_host = aws_db_instance.mysql.address
+    db_user = var.db_user
+    db_pass = var.db_pass
+    db_name = var.db_name
+    root_user = var.root_user
+    root_pass = var.root_pass
+
   }
+}
+
+data "template_file" "apache" {
+  template = file("./files/apache.conf.j2")
 }
 
 
@@ -78,9 +112,9 @@ resource "aws_db_instance" "mysql" {
   engine                 = "mysql"
   engine_version         = "5.7"
   instance_class         = "db.t2.micro"
-  name                   = var.dbname
-  username               = var.username
-  password               = var.password
+  name                   = var.db_name
+  username               = var.root_user
+  password               = var.root_pass
   parameter_group_name   = "default.mysql5.7"
   vpc_security_group_ids = module.myVpc.mysql_sg
   db_subnet_group_name   = module.myVpc.subnet_group

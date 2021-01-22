@@ -1,39 +1,45 @@
-variable "availabilityZone" {
+variable "availability_zone" {
      default = "ap-south-1a"
 }
-variable "instanceTenancy" {
+variable "instance_tenancy" {
     default = "default"
 }
-variable "dnsSupport" {
+variable "dns_support" {
     default = true
 }
 variable "dnsHostNames" {
     default = true
 }
-variable "vpcCIDRblock" {
+variable "vpc_cidrblock" {
+    type = string
     default = "10.0.0.0/16"
 }
-variable "publicSubnetCIDRblock" {
+variable "public_subnet_cidrblock" {
+    type = string
     default = "10.0.0.0/24"
 }
-variable "privateSubnet1CIDRblock" {
+variable "private_subnet1_cidrblock" {
+    type = string
     default = "10.0.1.0/24"
 }
-variable "privateSubnet2CIDRblock" {
+variable "private_subnet2_cidrblock" {
+    type = string
     default = "10.0.2.0/24"
 }
-variable "destinationCIDRblock" {
+variable "destination_cidrblock" {
+    type = string
     default = "0.0.0.0/0"
 }
-variable "ingressCIDRblock" {
+variable "ingress_cidrblock" {
     type = list
     default = [ "0.0.0.0/0" ]
 }
-variable "egressCIDRblock" {
+variable "egress_cidrblock" {
     type = list
     default = [ "0.0.0.0/0" ]
 }
-variable "mapPublicIP" {
+variable "map_publicip" {
+    type = bool
     default = true
 }
 variable "ingress_ports" {
@@ -45,3 +51,4 @@ variable stack {
   description = "this is name for tags"
   default     = "terraform"
 }
+

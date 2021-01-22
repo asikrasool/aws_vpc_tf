@@ -1,9 +1,9 @@
 # create the Public Subnet
 resource "aws_subnet" "My_VPC_Public_Subnet" {
   vpc_id                  = aws_vpc.My_VPC.id
-  cidr_block              = var.publicSubnetCIDRblock
-  map_public_ip_on_launch = var.mapPublicIP
-  availability_zone       = var.availabilityZone
+  cidr_block              = var.public_subnet_cidrblock
+  map_public_ip_on_launch = var.map_publicip
+  availability_zone       = var.availability_zone
   tags = {
     Name = "My VPC Public Subnet"
   }
@@ -21,7 +21,7 @@ resource "aws_internet_gateway" "My_VPC_GW" {
 resource "aws_route_table" "My_VPC_route_table" {
   vpc_id = aws_vpc.My_VPC.id
   route {
-    cidr_block = var.destinationCIDRblock
+    cidr_block = var.destination_cidrblock
     gateway_id = aws_internet_gateway.My_VPC_GW.id
   }
   tags = {

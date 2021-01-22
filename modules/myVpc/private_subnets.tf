@@ -9,7 +9,7 @@ resource "aws_subnet" "My_VPC_Private_Subnet" {
   ]
   vpc_id = aws_vpc.My_VPC.id
   #count                   = 
-  cidr_block              = var.privateSubnet1CIDRblock
+  cidr_block              = var.private_subnet1_cidrblock
   availability_zone       = data.aws_availability_zones.azs.names[0]
   map_public_ip_on_launch = false
   tags = {
@@ -24,7 +24,7 @@ resource "aws_subnet" "My_VPC_Private_Subnet2" {
   ]
   vpc_id = aws_vpc.My_VPC.id
   #count                   = 
-  cidr_block              = var.privateSubnet2CIDRblock
+  cidr_block              = var.private_subnet2_cidrblock
   availability_zone       = data.aws_availability_zones.azs.names[1]
   map_public_ip_on_launch = false
   tags = {
@@ -67,7 +67,7 @@ resource "aws_route_table" "nat_gateway_rt" {
   ]
   vpc_id = aws_vpc.My_VPC.id
   route {
-    cidr_block     = var.destinationCIDRblock
+    cidr_block     = var.destination_cidrblock
     nat_gateway_id = aws_nat_gateway.nat.id
   }
   tags = {
