@@ -9,10 +9,10 @@
     php_modules: [ 'php-curl', 'php-gd', 'php-mbstring', 'php-xml', 'php-xmlrpc', 'php-soap', 'php-intl', 'php-zip' ]
     #MySQL Settings
     mysql_root_user: "${root_user}"
-    mysql_root_password: "${root_pass}"
+    mysql_root_pass: "${root_pass}"
     mysql_db: "${db_name}"
     mysql_db_user: "${db_user}"
-    mysql_db_password: "${db_pass}"
+    mysql_db_user_pass: "${db_pass}"
     #HTTP Settings
     http_host: "wordpress"
     http_conf: "wordpress.conf"
@@ -27,7 +27,7 @@
 
     - name: Install LAMP Packages
       apt: name={{ item }} update_cache=yes state=latest
-      loop: [ 'apache2','apache2-utils', 'python3-pymysql', 'php', 'php-mysql', 'libapache2-mod-php' ]
+      loop: [ 'apache2','apache2-utils', 'python3-pymysql', 'php', 'php-mysql', 'libapache2-mod-php','python3-pip', 'mysql-client','libmysqlclient-dev','python3-mysqldb']
       tags: [ system ]
 
     - name: Install PHP Extensions
@@ -82,7 +82,7 @@
          login_host: "{{ db_host }}"
          #port: "{{ db_port }}"
          name: "{{ mysql_db_user }}"
-         password: "{{ mysql_db_pass }}"
+         password: "{{ mysql_db_user_pass }}"
          priv: "{{ mysql_db }}.*:ALL"
          state: present
          login_user: "{{ mysql_root_user }}"
